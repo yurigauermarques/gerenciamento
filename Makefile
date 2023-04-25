@@ -11,3 +11,6 @@ down:
 	docker-compose down
 .PHONY: down
 
+open:
+	symfony open:local
+.PHONY:open
