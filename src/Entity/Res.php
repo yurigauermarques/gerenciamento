@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ResRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -22,6 +24,37 @@ class Res
 
     #[ORM\Column(length: 1)]
     private ?string $sexo = null;
+
+    #[ORM\Column(length: 5)]
+    private ?string $situcao = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $observacao = null;
+
+    #[ORM\Column(length: 9)]
+    private ?string $status = null;
+
+    #[ORM\OneToMany(mappedBy: 'res', targetEntity: Pesagem::class, orphanRemoval: true)]
+    private Collection $pesagens;
+
+    #[ORM\OneToMany(mappedBy: 'res', targetEntity: Aplicacao::class, orphanRemoval: true)]
+    private Collection $aplicacoes;
+
+    public function __construct()
+    {
+        $this->pesagens = new ArrayCollection();
+        $this->aplicacoes = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        $era = '';
+        if (null !== $this->getDataNascimento()) {
+            $era = $this->getDataNascimento()->format('Y');
+        }
+
+        return $this->getNumero().' - '.$era;
+    }
 
     public function getId(): ?int
     {
@@ -64,8 +97,99 @@ class Res
         return $this;
     }
 
-    public function __toString()
+    public function getSitucao(): ?string
     {
-        return $this->getNumero().' - '.$this->getDataNascimento()->format('Y');
+        return $this->situcao;
+    }
+
+    public function setSitucao(string $situcao): self
+    {
+        $this->situcao = $situcao;
+
+        return $this;
+    }
+
+    public function getObservacao(): ?string
+    {
+        return $this->observacao;
+    }
+
+    public function setObservacao(?string $observacao): self
+    {
+        $this->observacao = $observacao;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Pesagem>
+     */
+    public function getPesagens(): Collection
+    {
+        return $this->pesagens;
+    }
+
+    public function addPesagem(Pesagem $pesagem): self
+    {
+        if (!$this->pesagens->contains($pesagem)) {
+            $this->pesagens->add($pesagem);
+            $pesagem->setRes($this);
+        }
+
+        return $this;
+    }
+
+    public function removePesagen(Pesagem $pesagen): self
+    {
+        if ($this->pesagens->removeElement($pesagen)) {
+            // set the owning side to null (unless already changed)
+            if ($pesagen->getRes() === $this) {
+                $pesagen->setRes(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Aplicacao>
+     */
+    public function getAplicacoes(): Collection
+    {
+        return $this->aplicacoes;
+    }
+
+    public function addAplicaco(Aplicacao $aplicaco): self
+    {
+        if (!$this->aplicacoes->contains($aplicaco)) {
+            $this->aplicacoes->add($aplicaco);
+            $aplicaco->setRes($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAplicaco(Aplicacao $aplicaco): self
+    {
+        if ($this->aplicacoes->removeElement($aplicaco)) {
+            // set the owning side to null (unless already changed)
+            if ($aplicaco->getRes() === $this) {
+                $aplicaco->setRes(null);
+            }
+        }
+
+        return $this;
     }
 }
